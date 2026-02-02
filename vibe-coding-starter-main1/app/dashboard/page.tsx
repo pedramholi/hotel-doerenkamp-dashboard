@@ -14,6 +14,7 @@ import { EnhancedPerformance } from '@/components/dashboard/EnhancedPerformance'
 import { DateRangeFilter, type DateRange } from '@/components/dashboard/DateRangeFilter';
 import { ViewToggle, type ViewType } from '@/components/dashboard/ViewToggle';
 import { RefreshIndicator } from '@/components/dashboard/RefreshIndicator';
+import { ExportButton } from '@/components/dashboard/ExportButton';
 import { generateDashboardData } from '@/lib/dashboard-data-generator';
 import { useState, useEffect } from 'react';
 
@@ -127,6 +128,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <ExportButton />
                 <RefreshIndicator
                   onRefresh={handleRefresh}
                   autoRefreshMinutes={0}
