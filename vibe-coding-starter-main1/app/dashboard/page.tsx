@@ -6,7 +6,7 @@ import { AverageSalesChart } from '@/components/dashboard/AverageSalesChart';
 import { FormationStatus } from '@/components/dashboard/FormationStatus';
 import { SuccessRate } from '@/components/dashboard/SuccessRate';
 import { RecentEmails } from '@/components/dashboard/RecentEmails';
-import { CompactUploadButton } from '@/components/dashboard/CompactUploadButton';
+import { SmartBookingUpload } from '@/components/dashboard/SmartBookingUpload';
 import { XLSXLoader } from '@/components/dashboard/XLSXLoader';
 import { RevPARCard } from '@/components/dashboard/RevPARCard';
 import { CountryChart } from '@/components/dashboard/CountryChart';
@@ -109,13 +109,8 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* Stat Cards Row with Floating Upload Button */}
-            <div className="mb-4 xl:mb-5 relative">
-              {/* Floating Upload Button - positioned above and outside the stat cards */}
-              <div className="absolute -top-16 right-0 z-20">
-                <CompactUploadButton onImportComplete={handleImportComplete} />
-              </div>
-
+            {/* Stat Cards Row */}
+            <div className="mb-4 xl:mb-5">
               <StatCards stats={dashboardData.stats} />
             </div>
 
@@ -149,8 +144,11 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Right Column - RevPAR, Performance and Occupancy */}
+              {/* Right Column - Upload, RevPAR, Performance and Occupancy */}
               <div className="lg:col-span-4 space-y-4 xl:space-y-5">
+                {/* Booking Upload */}
+                <SmartBookingUpload onImportComplete={handleImportComplete} />
+
                 {/* RevPAR Card */}
                 <RevPARCard
                   revPAR={dashboardData.enhancedMetrics.revPAR}

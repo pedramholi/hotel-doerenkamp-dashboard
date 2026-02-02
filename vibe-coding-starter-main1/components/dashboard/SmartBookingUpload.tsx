@@ -150,7 +150,7 @@ export function SmartBookingUpload({ onImportComplete }: SmartBookingUploadProps
     <>
       <div className="bg-white/55 dark:bg-gray-900/55 backdrop-blur-sm border border-white/55 dark:border-white/8 rounded-3xl p-5 xl:p-6 shadow-lg dark:shadow-2xl">
         <div className="flex items-start justify-between mb-4">
-          <div>
+          <div className="flex-1">
             <h3 className="text-base xl:text-lg font-bold text-gray-900 dark:text-gray-50 mb-1">
               Buchungen importieren
             </h3>
@@ -158,34 +158,29 @@ export function SmartBookingUpload({ onImportComplete }: SmartBookingUploadProps
               Booking.com Excel-Dateien hochladen
             </p>
           </div>
-          <FileSpreadsheet className="w-6 h-6 text-primary-500" />
+
+          {/* Compact Upload Button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xls,.xlsx"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          <button
+            onClick={handleClick}
+            disabled={isProcessing}
+            className="w-12 h-12 rounded-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 flex-shrink-0 ml-3"
+            title="Excel-Datei auswählen"
+          >
+            {isProcessing ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Upload className="w-5 h-5 text-white" />
+            )}
+          </button>
         </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xls,.xlsx"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-
-        <button
-          onClick={handleClick}
-          disabled={isProcessing}
-          className="w-full h-12 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2 mb-4"
-        >
-          {isProcessing ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Verarbeite...
-            </>
-          ) : (
-            <>
-              <Upload className="w-4 h-4" />
-              {fileName || 'Excel-Datei auswählen (.xls, .xlsx)'}
-            </>
-          )}
-        </button>
 
         {result && (
           <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 mb-4">
