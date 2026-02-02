@@ -2,17 +2,24 @@
 
 import { Phone, Calendar, Search, Bell, ChevronDown } from 'lucide-react';
 import { ThemeSwitch } from '@/components/shared/ThemeSwitch';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const tabs = [
-  'Dashboard',
-  'Finance',
-  'Accounts',
-  'HR and Payroll',
-  'Peoples',
-  'Contracts',
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Buchungen', href: '/dashboard/buchungen' },
+  { name: 'Finance', href: '/dashboard/finance' },
+  { name: 'Accounts', href: '/dashboard/accounts' },
+  { name: 'HR and Payroll', href: '/dashboard/hr' },
+  { name: 'Peoples', href: '/dashboard/peoples' },
+  { name: 'Contracts', href: '/dashboard/contracts' },
 ];
 
 export function GlassNav() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href;
+
   return (
     <nav className="w-full h-14 rounded-full bg-white/55 dark:bg-gray-900/55 backdrop-blur-sm border border-white/55 dark:border-white/8 shadow-sm px-4 flex items-center justify-between gap-4">
       {/* Logo */}
@@ -24,27 +31,28 @@ export function GlassNav() {
 
       {/* Center Tabs - Hidden on mobile, visible on lg+ */}
       <div className="hidden lg:flex items-center gap-1 xl:gap-4 flex-1 justify-center max-w-3xl overflow-x-auto scrollbar-hide">
-        {tabs.map((tab, index) => (
-          <button
-            key={tab}
-            className={`
-              px-3 xl:px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-              ${
-                index === 0
-                  ? 'bg-white/90 dark:bg-white/8 text-gray-900 dark:text-gray-50 shadow-sm'
-                  : 'text-gray-900/52 dark:text-gray-50/55 hover:text-gray-900/78 dark:hover:text-gray-50/78 hover:bg-white/15 dark:hover:bg-white/4'
-              }
-            `}
-          >
-            {tab}
-          </button>
+        {tabs.map((tab) => (
+          <Link key={tab.href} href={tab.href}>
+            <button
+              className={`
+                px-3 xl:px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
+                ${
+                  isActive(tab.href)
+                    ? 'bg-white/90 dark:bg-white/8 text-gray-900 dark:text-gray-50 shadow-sm'
+                    : 'text-gray-900/52 dark:text-gray-50/55 hover:text-gray-900/78 dark:hover:text-gray-50/78 hover:bg-white/15 dark:hover:bg-white/4'
+                }
+              `}
+            >
+              {tab.name}
+            </button>
+          </Link>
         ))}
       </div>
 
-      {/* Mobile: Just show Dashboard */}
+      {/* Mobile: Show current tab name */}
       <div className="flex lg:hidden flex-1 justify-center">
         <button className="px-4 py-2 rounded-full text-sm font-medium bg-white/90 dark:bg-white/8 text-gray-900 dark:text-gray-50 shadow-sm">
-          Dashboard
+          {tabs.find((tab) => isActive(tab.href))?.name || 'Dashboard'}
         </button>
       </div>
 
