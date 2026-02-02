@@ -10,6 +10,9 @@ import {
   Bed,
   Users,
   Calendar,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 import { useState } from 'react';
 import { StatCardModal } from './StatCardModal';
@@ -135,15 +138,29 @@ function StatCard({
           <div className="text-sm text-gray-900/52 dark:text-gray-50/55 line-clamp-2 flex-1">
             {label}
           </div>
-          {trend && (
+          {trend && trend !== '—' && (
             <span
-              className={`text-xs font-semibold ${
+              className={`flex items-center gap-0.5 text-xs font-semibold ${
                 trend.startsWith('+')
                   ? 'text-green-600 dark:text-green-400'
+                  : trend.startsWith('-')
+                  ? 'text-red-600 dark:text-red-400'
                   : 'text-gray-600 dark:text-gray-400'
               }`}
             >
+              {trend.startsWith('+') ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : trend.startsWith('-') ? (
+                <TrendingDown className="w-3 h-3" />
+              ) : (
+                <Minus className="w-3 h-3" />
+              )}
               {trend}
+            </span>
+          )}
+          {trend === '—' && (
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+              —
             </span>
           )}
         </div>

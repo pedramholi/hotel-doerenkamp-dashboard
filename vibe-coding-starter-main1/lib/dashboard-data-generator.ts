@@ -26,6 +26,58 @@ function filterBookingsByDateRange(bookings: Booking[], dateRange: DateRangeType
   });
 }
 
+/**
+ * Calculate trend by comparing current period with previous period
+ */
+function calculateTrend(
+  currentValue: number,
+  bookings: Booking[],
+  dateRange: DateRangeType,
+  metricGetter: (bookings: Booking[]) => number
+): { trend: string; direction: 'up' | 'down' | 'neutral' } {
+  if (dateRange === 'all' || currentValue === 0) {
+    return { trend: '—', direction: 'neutral' };
+  }
+
+  const days = parseInt(dateRange);
+  const now = new Date();
+  const currentStart = new Date(now);
+  currentStart.setDate(currentStart.getDate() - days);
+  currentStart.setHours(0, 0, 0, 0);
+
+  const previousStart = new Date(currentStart);
+  previousStart.setDate(previousStart.getDate() - days);
+  const previousEnd = new Date(currentStart);
+  previousEnd.setDate(previousEnd.getDate() - 1);
+
+  // Filter bookings for previous period
+  const previousBookings = bookings.filter(booking => {
+    const bookingDate = booking.checkIn;
+    return bookingDate >= previousStart && bookingDate <= previousEnd;
+  });
+
+  if (previousBookings.length === 0) {
+    return { trend: '—', direction: 'neutral' };
+  }
+
+  const previousValue = metricGetter(previousBookings);
+
+  if (previousValue === 0) {
+    return currentValue > 0
+      ? { trend: '+100%', direction: 'up' }
+      : { trend: '—', direction: 'neutral' };
+  }
+
+  const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+  const direction = percentageChange > 0 ? 'up' : percentageChange < 0 ? 'down' : 'neutral';
+  const sign = percentageChange > 0 ? '+' : '';
+
+  return {
+    trend: `${sign}${percentageChange.toFixed(1)}%`,
+    direction
+  };
+}
+
 export function generateDashboardData(dateRange: DateRangeType = 'all') {
   // Get bookings from localStorage
   const storedBookings = getAllBookings();
@@ -199,6 +251,57 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
       return monthDay === activeMonthLabel;
     })?.bookings || 0;
 
+  // Calculate trends comparing current period with previous period
+  const allParsedBookings = storedBookings.map(parseBookingRow);
+  const revenueTrend = calculateTrend(
+    metrics.totalRevenue,
+    allParsedBookings,
+    dateRange,
+    (bookings) => {
+      const filtered = filterBookingsByDateRange(bookings, dateRange);
+      return calculateMetrics(filtered, 27).totalRevenue;
+    }
+  );
+
+  const bookingsTrend = calculateTrend(
+    metrics.totalBookings,
+    allParsedBookings,
+    dateRange,
+    (bookings) => {
+      const filtered = filterBookingsByDateRange(bookings, dateRange);
+      return calculateMetrics(filtered, 27).totalBookings;
+    }
+  );
+
+  const guestsTrend = calculateTrend(
+    metrics.totalGuests,
+    allParsedBookings,
+    dateRange,
+    (bookings) => {
+      const filtered = filterBookingsByDateRange(bookings, dateRange);
+      return calculateMetrics(filtered, 27).totalGuests;
+    }
+  );
+
+  const nightsTrend = calculateTrend(
+    metrics.totalNights,
+    allParsedBookings,
+    dateRange,
+    (bookings) => {
+      const filtered = filterBookingsByDateRange(bookings, dateRange);
+      return calculateMetrics(filtered, 27).totalNights;
+    }
+  );
+
+  // Get comparison period label
+  const getComparisonLabel = (dateRange: DateRangeType) => {
+    if (dateRange === 'all') return '';
+    const days = parseInt(dateRange);
+    return `vs. vorherige ${days} Tage`;
+  };
+
+  const comparisonLabel = getComparisonLabel(dateRange);
+
   return {
     hotelName: 'Hotel Doerenkamp',
     location: 'Düsseldorf, Germany',
@@ -209,30 +312,30 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
       {
         icon: 'euro',
         value: formatEuro(metrics.totalRevenue),
-        label: `Total Revenue (${dateRangeLabel})`,
+        label: `Total Revenue${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: true,
-        trend: '+18.5%',
+        trend: revenueTrend.trend,
       },
       {
         icon: 'bed',
         value: metrics.totalBookings.toString(),
-        label: 'Total Bookings',
+        label: `Total Bookings${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
-        trend: '+15.2%',
+        trend: bookingsTrend.trend,
       },
       {
         icon: 'users',
         value: metrics.totalGuests.toString(),
-        label: 'Total Guests',
+        label: `Total Guests${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
-        trend: '+12.8%',
+        trend: guestsTrend.trend,
       },
       {
         icon: 'calendar',
         value: metrics.totalNights.toString(),
-        label: 'Room Nights Booked',
+        label: `Room Nights${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
-        trend: '+14.5%',
+        trend: nightsTrend.trend,
       },
     ],
 
@@ -243,13 +346,13 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
         {
           label: 'Gross Revenue',
           value: formatEuroDecimal(metrics.totalRevenue),
-          delta: '+18.5%',
-          tone: 'success' as const,
+          delta: revenueTrend.trend,
+          tone: revenueTrend.direction === 'up' ? 'success' as const : revenueTrend.direction === 'down' ? 'danger' as const : 'neutral' as const,
         },
         {
           label: `Commission (${Math.round((metrics.commissionTotal / metrics.totalRevenue) * 100)}%)`,
           value: formatEuroDecimal(metrics.commissionTotal),
-          delta: '-12%',
+          delta: revenueTrend.trend, // Commission trend follows revenue trend
           tone: 'danger' as const,
         },
       ],
