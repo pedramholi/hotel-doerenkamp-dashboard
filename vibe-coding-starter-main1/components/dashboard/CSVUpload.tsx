@@ -4,7 +4,7 @@ import { Upload, FileSpreadsheet } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 interface CSVUploadProps {
-  onDataImported?: (data: any) => void;
+  onDataImported?: (data: unknown) => void;
 }
 
 export function CSVUpload({ onDataImported }: CSVUploadProps) {

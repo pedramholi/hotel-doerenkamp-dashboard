@@ -159,12 +159,12 @@ export function generateDashboardData() {
     .slice(0, 5)
     .map((item, index) => ({
       id: (index + 1).toString(),
-      from: item.room,
+      name: item.room,
+      avatar: `${index + 1}`,
       subject: `${item.bookings} Buchungen`,
-      preview: formatEuro(item.revenue),
-      time: index === 0 ? 'Top Performer' : index === 1 ? 'High Demand' : 'Popular',
-      starred: index < 3,
-      hasAttachment: false,
+      invited: formatEuro(item.revenue),
+      status: index === 0 ? 'Top Performer' : index === 1 ? 'High Demand' : 'Popular',
+      time: `${item.bookings}x`,
     }));
 
   const netRevenue = metrics.totalRevenue - metrics.commissionTotal;

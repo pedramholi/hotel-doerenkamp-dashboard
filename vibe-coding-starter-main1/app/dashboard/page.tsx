@@ -14,8 +14,10 @@ import { EnhancedPerformance } from '@/components/dashboard/EnhancedPerformance'
 import { generateDashboardData } from '@/lib/dashboard-data-generator';
 import { useState, useEffect } from 'react';
 
+type DashboardData = ReturnType<typeof generateDashboardData>;
+
 export default function DashboardPage() {
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
