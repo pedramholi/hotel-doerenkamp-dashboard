@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { StatCardModal } from './StatCardModal';
+import { Sparkline } from './Sparkline';
 
 interface StatCardProps {
   icon: string;
@@ -23,6 +24,7 @@ interface StatCardProps {
   label: string;
   hasOverflowMenu?: boolean;
   trend?: string;
+  sparklineData?: number[];
 }
 
 const iconMap = {
@@ -52,6 +54,7 @@ function StatCard({
   label,
   hasOverflowMenu,
   trend,
+  sparklineData,
   index,
 }: StatCardProps & { index: number }) {
   const Icon = iconMap[icon as keyof typeof iconMap];
@@ -128,9 +131,28 @@ function StatCard({
           )}
         </div>
 
-        {/* Value */}
-        <div className="text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-50 mb-1">
-          {value}
+        {/* Value and Sparkline */}
+        <div className="space-y-1">
+          <div className="text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-50">
+            {value}
+          </div>
+          {sparklineData && sparklineData.length > 0 && (
+            <div className="flex items-center justify-start">
+              <Sparkline
+                data={sparklineData}
+                width={80}
+                height={20}
+                color="currentColor"
+                className={`${
+                  trend && trend.startsWith('+')
+                    ? 'text-green-500 dark:text-green-400'
+                    : trend && trend.startsWith('-')
+                    ? 'text-red-500 dark:text-red-400'
+                    : 'text-gray-400 dark:text-gray-500'
+                }`}
+              />
+            </div>
+          )}
         </div>
 
         {/* Label and Trend */}

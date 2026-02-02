@@ -27,6 +27,34 @@ function filterBookingsByDateRange(bookings: Booking[], dateRange: DateRangeType
 }
 
 /**
+ * Generate 7-day sparkline data for a metric
+ */
+function generate7DaySparkline(
+  bookings: Booking[],
+  metricGetter: (bookings: Booking[]) => number
+): number[] {
+  const sparklineData: number[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let i = 6; i >= 0; i--) {
+    const dayStart = new Date(today);
+    dayStart.setDate(dayStart.getDate() - i);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+
+    const dayBookings = bookings.filter(booking => {
+      const checkIn = booking.checkIn;
+      return checkIn >= dayStart && checkIn < dayEnd;
+    });
+
+    sparklineData.push(metricGetter(dayBookings));
+  }
+
+  return sparklineData;
+}
+
+/**
  * Calculate trend by comparing current period with previous period
  */
 function calculateTrend(
@@ -302,6 +330,27 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
 
   const comparisonLabel = getComparisonLabel(dateRange);
 
+  // Generate 7-day sparkline data for each metric
+  const revenueSparkline = generate7DaySparkline(allParsedBookings, (bookings) => {
+    if (bookings.length === 0) return 0;
+    return calculateMetrics(bookings, 27).totalRevenue;
+  });
+
+  const bookingsSparkline = generate7DaySparkline(allParsedBookings, (bookings) => {
+    if (bookings.length === 0) return 0;
+    return calculateMetrics(bookings, 27).totalBookings;
+  });
+
+  const guestsSparkline = generate7DaySparkline(allParsedBookings, (bookings) => {
+    if (bookings.length === 0) return 0;
+    return calculateMetrics(bookings, 27).totalGuests;
+  });
+
+  const nightsSparkline = generate7DaySparkline(allParsedBookings, (bookings) => {
+    if (bookings.length === 0) return 0;
+    return calculateMetrics(bookings, 27).totalNights;
+  });
+
   return {
     hotelName: 'Hotel Doerenkamp',
     location: 'Düsseldorf, Germany',
@@ -315,6 +364,7 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
         label: `Total Revenue${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: true,
         trend: revenueTrend.trend,
+        sparklineData: revenueSparkline,
       },
       {
         icon: 'bed',
@@ -322,6 +372,7 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
         label: `Total Bookings${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
         trend: bookingsTrend.trend,
+        sparklineData: bookingsSparkline,
       },
       {
         icon: 'users',
@@ -329,6 +380,7 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
         label: `Total Guests${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
         trend: guestsTrend.trend,
+        sparklineData: guestsSparkline,
       },
       {
         icon: 'calendar',
@@ -336,6 +388,7 @@ export function generateDashboardData(dateRange: DateRangeType = 'all') {
         label: `Room Nights${comparisonLabel ? ` (${comparisonLabel})` : ''}`,
         hasOverflowMenu: false,
         trend: nightsTrend.trend,
+        sparklineData: nightsSparkline,
       },
     ],
 
