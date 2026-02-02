@@ -3,6 +3,7 @@
 import { Upload, CheckCircle } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { UpdateConfirmDialog } from './UpdateConfirmDialog';
+import { ImportResultToast } from './ImportResultToast';
 import {
   analyzeBookings,
   mergeBookings,
@@ -20,6 +21,11 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
   const [pendingUpdates, setPendingUpdates] = useState<UpdateDiff[]>([]);
   const [pendingBookings, setPendingBookings] = useState<StoredBooking[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    added: number;
+    updated: number;
+    skipped: number;
+  } | null>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -76,6 +82,7 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
         const result = mergeBookings(jsonData, true);
         console.log('✅ Import complete:', result);
 
+        setImportResult(result);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 2000);
 
@@ -99,6 +106,7 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
     const result = mergeBookings(pendingBookings, applyUpdates);
     console.log('✅ Import complete after confirmation:', result);
 
+    setImportResult(result);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
 
@@ -145,6 +153,13 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
           updates={pendingUpdates}
           onConfirm={handleConfirmUpdates}
           onCancel={handleCancelUpdates}
+        />
+      )}
+
+      {importResult && (
+        <ImportResultToast
+          result={importResult}
+          onClose={() => setImportResult(null)}
         />
       )}
     </>
