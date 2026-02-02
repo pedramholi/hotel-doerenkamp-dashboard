@@ -61,13 +61,20 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
 
       const analysis = analyzeBookings(jsonData);
 
+      console.log('📊 Import Analysis:', {
+        newBookings: analysis.newBookings.length,
+        duplicatesNoChange: analysis.duplicatesNoChange.length,
+        duplicatesWithUpdates: analysis.duplicatesWithUpdates.length,
+      });
+
       if (analysis.duplicatesWithUpdates.length > 0) {
+        console.log('⚠️ Updates found, showing dialog...');
         setPendingUpdates(analysis.duplicatesWithUpdates);
         setPendingBookings(jsonData);
         setIsProcessing(false);
       } else {
         const result = mergeBookings(jsonData, true);
-        console.log('Import complete:', result);
+        console.log('✅ Import complete:', result);
 
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 2000);
@@ -90,15 +97,20 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
 
   const handleConfirmUpdates = (applyUpdates: boolean) => {
     const result = mergeBookings(pendingBookings, applyUpdates);
-    console.log('Import complete:', result);
+    console.log('✅ Import complete after confirmation:', result);
 
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
+    setTimeout(() => setShowSuccess(false), 3000);
 
     if (onImportComplete) {
       onImportComplete();
     }
 
+    setPendingUpdates([]);
+    setPendingBookings([]);
+  };
+
+  const handleCancelUpdates = () => {
     setPendingUpdates([]);
     setPendingBookings([]);
   };
@@ -132,6 +144,7 @@ export function CompactUploadButton({ onImportComplete }: CompactUploadButtonPro
         <UpdateConfirmDialog
           updates={pendingUpdates}
           onConfirm={handleConfirmUpdates}
+          onCancel={handleCancelUpdates}
         />
       )}
     </>
