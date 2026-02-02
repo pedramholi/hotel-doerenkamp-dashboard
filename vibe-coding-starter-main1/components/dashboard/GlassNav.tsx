@@ -4,6 +4,8 @@ import { Phone, Calendar, Search, Bell, ChevronDown } from 'lucide-react';
 import { ThemeSwitch } from '@/components/shared/ThemeSwitch';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { GlobalSearch } from './GlobalSearch';
 
 const tabs = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -17,10 +19,25 @@ const tabs = [
 
 export function GlassNav() {
   const pathname = usePathname();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const isActive = (href: string) => pathname === href;
 
+  // Global keyboard shortcut for search (Cmd/Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
+    <>
     <nav className="w-full h-14 rounded-full bg-white/55 dark:bg-gray-900/55 backdrop-blur-sm border border-white/55 dark:border-white/8 shadow-sm px-4 flex items-center justify-between gap-4">
       {/* Logo */}
       <div className="flex-shrink-0">
@@ -62,7 +79,13 @@ export function GlassNav() {
         <div className="hidden md:flex items-center gap-2">
           <IconButton icon={Phone} />
           <IconButton icon={Calendar} />
-          <IconButton icon={Search} />
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 dark:hover:bg-white/4 transition-colors"
+            title="Suche (⌘K)"
+          >
+            <Search className="w-5 h-5 text-gray-900/85 dark:text-gray-50/85 stroke-[2]" />
+          </button>
           <IconButton icon={Bell} hasBadge />
         </div>
 
@@ -78,6 +101,9 @@ export function GlassNav() {
         </div>
       </div>
     </nav>
+
+    <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 }
 

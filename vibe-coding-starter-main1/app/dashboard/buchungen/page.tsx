@@ -17,6 +17,13 @@ export default function BuchungenPage() {
   useEffect(() => {
     setBookings(getAllBookings());
     setIsLoading(false);
+
+    // Check if there's a selected booking from global search
+    const selectedBookingId = sessionStorage.getItem('selectedBooking');
+    if (selectedBookingId) {
+      setSearchQuery(selectedBookingId);
+      sessionStorage.removeItem('selectedBooking');
+    }
   }, []);
 
   const filteredBookings = useMemo(() => {
