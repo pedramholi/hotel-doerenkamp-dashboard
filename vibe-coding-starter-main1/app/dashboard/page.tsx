@@ -11,6 +11,7 @@ import { XLSXLoader } from '@/components/dashboard/XLSXLoader';
 import { RevPARCard } from '@/components/dashboard/RevPARCard';
 import { CountryChart } from '@/components/dashboard/CountryChart';
 import { EnhancedPerformance } from '@/components/dashboard/EnhancedPerformance';
+import { DateRangeFilter, type DateRange } from '@/components/dashboard/DateRangeFilter';
 import { generateDashboardData } from '@/lib/dashboard-data-generator';
 import { useState, useEffect } from 'react';
 
@@ -19,16 +20,21 @@ type DashboardData = ReturnType<typeof generateDashboardData>;
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange>('all');
 
   useEffect(() => {
     // Only load data on client side to avoid hydration mismatch
-    setDashboardData(generateDashboardData());
+    setDashboardData(generateDashboardData(dateRange));
     setIsLoading(false);
-  }, []);
+  }, [dateRange]);
 
   const handleImportComplete = () => {
     // Refresh dashboard data after import
-    setDashboardData(generateDashboardData());
+    setDashboardData(generateDashboardData(dateRange));
+  };
+
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setDateRange(newRange);
   };
 
   // Show loading state during SSR/hydration
@@ -99,14 +105,21 @@ export default function DashboardPage() {
               <GlassNav />
             </div>
 
-            {/* Hotel Header */}
-            <div className="mb-4 px-1">
-              <h1 className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-50">
-                {dashboardData.hotelName}
-              </h1>
-              <p className="text-sm text-gray-900/52 dark:text-gray-50/55">
-                {dashboardData.location} • {dashboardData.greeting}
-              </p>
+            {/* Hotel Header with Date Filter */}
+            <div className="mb-4 px-1 flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-50">
+                  {dashboardData.hotelName}
+                </h1>
+                <p className="text-sm text-gray-900/52 dark:text-gray-50/55">
+                  {dashboardData.location} • {dashboardData.greeting}
+                </p>
+              </div>
+
+              <DateRangeFilter
+                selectedRange={dateRange}
+                onRangeChange={handleDateRangeChange}
+              />
             </div>
 
             {/* Stat Cards Row */}

@@ -7,7 +7,26 @@ import { getAllBookings } from './booking-storage';
 import { parseBookingRow, calculateMetrics, type Booking } from './bookingcom-parser';
 import { calculateEnhancedMetrics } from './enhanced-metrics';
 
-export function generateDashboardData() {
+export type DateRangeType = '7' | '30' | '90' | 'all';
+
+/**
+ * Filter bookings by date range
+ */
+function filterBookingsByDateRange(bookings: Booking[], dateRange: DateRangeType): Booking[] {
+  if (dateRange === 'all') return bookings;
+
+  const days = parseInt(dateRange);
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  cutoffDate.setHours(0, 0, 0, 0);
+
+  return bookings.filter(booking => {
+    const bookingDate = booking.checkIn;
+    return bookingDate >= cutoffDate;
+  });
+}
+
+export function generateDashboardData(dateRange: DateRangeType = 'all') {
   // Get bookings from localStorage
   const storedBookings = getAllBookings();
 
@@ -104,7 +123,10 @@ export function generateDashboardData() {
   }
 
   // Parse bookings
-  const bookings: Booking[] = storedBookings.map(parseBookingRow);
+  let bookings: Booking[] = storedBookings.map(parseBookingRow);
+
+  // Filter by date range
+  bookings = filterBookingsByDateRange(bookings, dateRange);
 
   // Calculate metrics
   const metrics = calculateMetrics(bookings, 27);
