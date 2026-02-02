@@ -183,7 +183,7 @@ export function SmartBookingUpload({ onImportComplete }: SmartBookingUploadProps
         </div>
 
         {result && (
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 mb-4">
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -203,18 +203,6 @@ export function SmartBookingUpload({ onImportComplete }: SmartBookingUploadProps
             </div>
           </div>
         )}
-
-        <div className="space-y-2">
-          <div className="text-xs font-semibold text-gray-900 dark:text-gray-50">
-            Funktionen:
-          </div>
-          <ul className="text-xs text-gray-900/52 dark:text-gray-50/55 space-y-1 pl-4">
-            <li>✓ Automatische Duplikat-Erkennung (Buchungsnummer)</li>
-            <li>✓ Update-Prüfung für vorhandene Buchungen</li>
-            <li>✓ Bestätigung vor Überschreiben von Daten</li>
-            <li>✓ Lokale Speicherung (localStorage)</li>
-          </ul>
-        </div>
       </div>
 
       {/* Update Confirmation Dialog */}
