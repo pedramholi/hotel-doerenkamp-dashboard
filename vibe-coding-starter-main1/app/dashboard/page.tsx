@@ -6,11 +6,44 @@ import { AverageSalesChart } from '@/components/dashboard/AverageSalesChart';
 import { FormationStatus } from '@/components/dashboard/FormationStatus';
 import { SuccessRate } from '@/components/dashboard/SuccessRate';
 import { RecentEmails } from '@/components/dashboard/RecentEmails';
-import { hotelDashboardData } from '@/data/hotel-dashboard-data';
+import { SmartBookingUpload } from '@/components/dashboard/SmartBookingUpload';
+import { XLSXLoader } from '@/components/dashboard/XLSXLoader';
+import { RevPARCard } from '@/components/dashboard/RevPARCard';
+import { CountryChart } from '@/components/dashboard/CountryChart';
+import { EnhancedPerformance } from '@/components/dashboard/EnhancedPerformance';
+import { generateDashboardData } from '@/lib/dashboard-data-generator';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Only load data on client side to avoid hydration mismatch
+    setDashboardData(generateDashboardData());
+    setIsLoading(false);
+  }, []);
+
+  const handleImportComplete = () => {
+    // Refresh dashboard data after import
+    setDashboardData(generateDashboardData());
+  };
+
+  // Show loading state during SSR/hydration
+  if (isLoading || !dashboardData) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-violet-50/60 via-sky-50/40 to-rose-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-gradient-to-br from-violet-50/60 via-sky-50/40 to-rose-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <>
+      <XLSXLoader />
+      <div className="min-h-screen w-full relative overflow-hidden bg-gradient-to-br from-violet-50/60 via-sky-50/40 to-rose-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Background Decorative Shapes - Light Mode */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Lavender wash */}
@@ -67,16 +100,16 @@ export default function DashboardPage() {
             {/* Hotel Header */}
             <div className="mb-4 px-1">
               <h1 className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-50">
-                {hotelDashboardData.hotelName}
+                {dashboardData.hotelName}
               </h1>
               <p className="text-sm text-gray-900/52 dark:text-gray-50/55">
-                {hotelDashboardData.location} • {hotelDashboardData.greeting}
+                {dashboardData.location} • {dashboardData.greeting}
               </p>
             </div>
 
             {/* Stat Cards Row */}
             <div className="mb-4 xl:mb-5">
-              <StatCards stats={hotelDashboardData.stats} />
+              <StatCards stats={dashboardData.stats} />
             </div>
 
             {/* Main Content Grid */}
@@ -85,46 +118,64 @@ export default function DashboardPage() {
               <div className="lg:col-span-8 space-y-4 xl:space-y-5">
                 {/* Revenue Chart */}
                 <AverageSalesChart
-                  title={hotelDashboardData.revenueChart.title}
-                  subtitle={hotelDashboardData.revenueChart.subtitle}
-                  metrics={hotelDashboardData.revenueChart.metrics}
-                  data={hotelDashboardData.revenueChart.data}
-                  activeMonth={hotelDashboardData.revenueChart.activeMonth}
-                  tooltipData={hotelDashboardData.revenueChart.tooltipData}
+                  title={dashboardData.revenueChart.title}
+                  subtitle={dashboardData.revenueChart.subtitle}
+                  metrics={dashboardData.revenueChart.metrics}
+                  data={dashboardData.revenueChart.data}
+                  activeMonth={dashboardData.revenueChart.activeMonth}
+                  tooltipData={dashboardData.revenueChart.tooltipData}
                 />
 
-                {/* Top Performing Rooms */}
-                <RecentEmails
-                  emails={hotelDashboardData.topRooms}
-                  title="Top Performing Rooms"
-                />
+                {/* Two Column Grid - Top Rooms and Country Chart */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:gap-5">
+                  {/* Top Performing Rooms */}
+                  <RecentEmails
+                    emails={dashboardData.topRooms}
+                    title="Top Performing Rooms"
+                  />
+
+                  {/* Revenue by Country */}
+                  <CountryChart
+                    data={dashboardData.enhancedMetrics.revenueByCountry}
+                    topN={5}
+                  />
+                </div>
               </div>
 
-              {/* Right Column - Performance and Occupancy */}
+              {/* Right Column - Upload, RevPAR, Performance and Occupancy */}
               <div className="lg:col-span-4 space-y-4 xl:space-y-5">
-                {/* Performance Metrics */}
-                <FormationStatus
-                  title={hotelDashboardData.performance.title}
-                  subtitle={hotelDashboardData.performance.subtitle}
-                  progress={hotelDashboardData.performance.progress}
-                  estimateTitle={hotelDashboardData.performance.metrics[0].label}
-                  estimateSubtitle={hotelDashboardData.performance.metrics[0].value}
-                  ctaLabel="View Full Report"
+                {/* Booking Upload */}
+                <SmartBookingUpload onImportComplete={handleImportComplete} />
+
+                {/* RevPAR Card */}
+                <RevPARCard
+                  revPAR={dashboardData.enhancedMetrics.revPAR}
+                  cancellationRate={dashboardData.enhancedMetrics.cancellationRate}
+                  distributionCost={dashboardData.enhancedMetrics.distributionCost}
+                />
+
+                {/* Enhanced Performance Metrics */}
+                <EnhancedPerformance
+                  title={dashboardData.performance.title}
+                  subtitle={dashboardData.performance.subtitle}
+                  futureOccupancy={dashboardData.enhancedMetrics.futureOccupancy}
+                  metrics={dashboardData.performance.metrics}
                 />
 
                 {/* Occupancy Rate */}
                 <SuccessRate
-                  title={hotelDashboardData.occupancyRate.title}
-                  subtitle={hotelDashboardData.occupancyRate.subtitle}
-                  value={hotelDashboardData.occupancyRate.value}
-                  supportingText={hotelDashboardData.occupancyRate.supportingText}
-                  miniStats={hotelDashboardData.occupancyRate.miniStats}
+                  title={dashboardData.occupancyRate.title}
+                  subtitle={dashboardData.occupancyRate.subtitle}
+                  value={dashboardData.occupancyRate.value}
+                  supportingText={dashboardData.occupancyRate.supportingText}
+                  miniStats={dashboardData.occupancyRate.miniStats}
                 />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
