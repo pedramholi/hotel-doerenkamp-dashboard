@@ -1,6 +1,5 @@
 'use client';
 
-import { Calendar, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 
 interface ChartData {
@@ -52,28 +51,6 @@ export function AverageSalesChart({
           <p className="text-sm text-gray-900/52 dark:text-gray-50/55">
             {subtitle}
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-900/78 dark:text-gray-50/78 hover:text-gray-900 dark:hover:text-gray-50 transition-colors">
-            <Calendar className="w-4 h-4" />
-            <span className="hidden sm:inline">Current Month</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-          <button className="w-9 h-9 rounded-full bg-white/65 dark:bg-white/6 flex items-center justify-center hover:bg-white/80 dark:hover:bg-white/10 transition-colors">
-            <ArrowUpRight className="w-5 h-5 text-gray-900/85 dark:text-gray-50/85 stroke-[2]" />
-          </button>
         </div>
       </div>
 
