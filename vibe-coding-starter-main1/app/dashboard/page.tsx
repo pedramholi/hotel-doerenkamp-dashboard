@@ -12,6 +12,7 @@ import { RevPARCard } from '@/components/dashboard/RevPARCard';
 import { CountryChart } from '@/components/dashboard/CountryChart';
 import { EnhancedPerformance } from '@/components/dashboard/EnhancedPerformance';
 import { DateRangeFilter, type DateRange } from '@/components/dashboard/DateRangeFilter';
+import { ViewToggle, type ViewType } from '@/components/dashboard/ViewToggle';
 import { generateDashboardData } from '@/lib/dashboard-data-generator';
 import { useState, useEffect } from 'react';
 
@@ -21,12 +22,15 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('all');
+  const [viewType, setViewType] = useState<ViewType>('day');
 
   useEffect(() => {
     // Only load data on client side to avoid hydration mismatch
+    // Note: viewType is tracked but not yet used in data generation
+    // Could be used to aggregate data by day/week/month in future enhancement
     setDashboardData(generateDashboardData(dateRange));
     setIsLoading(false);
-  }, [dateRange]);
+  }, [dateRange, viewType]);
 
   const handleImportComplete = () => {
     // Refresh dashboard data after import
@@ -105,7 +109,7 @@ export default function DashboardPage() {
               <GlassNav />
             </div>
 
-            {/* Hotel Header with Date Filter */}
+            {/* Hotel Header with Filters */}
             <div className="mb-4 px-1 flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-50">
@@ -116,10 +120,16 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <DateRangeFilter
-                selectedRange={dateRange}
-                onRangeChange={handleDateRangeChange}
-              />
+              <div className="flex items-center gap-2">
+                <ViewToggle
+                  selectedView={viewType}
+                  onViewChange={setViewType}
+                />
+                <DateRangeFilter
+                  selectedRange={dateRange}
+                  onRangeChange={handleDateRangeChange}
+                />
+              </div>
             </div>
 
             {/* Stat Cards Row */}
