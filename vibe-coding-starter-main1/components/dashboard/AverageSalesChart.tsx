@@ -130,28 +130,35 @@ export function AverageSalesChart({
             return (
               <div
                 key={item.month}
-                className="flex-1 flex flex-col items-center gap-2"
+                className="flex-1 flex flex-col items-center gap-2 cursor-pointer"
                 onMouseEnter={() => setHoveredBar(item.month)}
                 onMouseLeave={() => setHoveredBar(null)}
+                onClick={() => {
+                  // TODO: Could open a detailed modal for this day's data
+                  console.log('Clicked:', item.month, item.value);
+                }}
               >
                 {/* Tooltip */}
                 {isHovered && (
-                  <div className="absolute -top-24 bg-white/85 dark:bg-gray-900/85 backdrop-blur-sm rounded-xl p-3 shadow-lg z-10">
-                    {tooltipData.map((data, idx) => (
-                      <div key={idx} className="flex items-center gap-2 mb-1 last:mb-0">
-                        <div className={`w-2 h-2 rounded-full bg-${data.color}`} />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-50">
-                          {data.label}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl p-3 shadow-xl z-10 border border-white/55 dark:border-white/8 min-w-[140px]">
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      {item.month}
+                    </div>
+                    <div className="text-base font-bold text-gray-900 dark:text-gray-50">
+                      €{item.value.toLocaleString('de-DE')}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Click for details
+                    </div>
                   </div>
                 )}
 
                 {/* Bar */}
                 <div className="w-full flex items-end justify-center h-64">
                   <div
-                    className="w-full max-w-10 rounded-xl transition-all relative overflow-hidden"
+                    className={`w-full max-w-10 rounded-xl transition-all relative overflow-hidden ${
+                      isHovered ? 'scale-105 shadow-lg' : ''
+                    }`}
                     style={{ height: `${heightPercent}%` }}
                   >
                     {isActive ? (

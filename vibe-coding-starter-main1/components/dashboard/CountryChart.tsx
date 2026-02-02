@@ -1,4 +1,7 @@
-import { Globe } from 'lucide-react';
+'use client';
+
+import { Globe, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
 
 interface CountryData {
   country: string;
@@ -12,6 +15,7 @@ interface CountryChartProps {
 }
 
 export function CountryChart({ data, topN = 5 }: CountryChartProps) {
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const formatEuro = (amount: number) =>
     `€${amount.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
@@ -71,9 +75,20 @@ export function CountryChart({ data, topN = 5 }: CountryChartProps) {
             const flag = flagMap[item.country] || '🌍';
 
             return (
-              <div key={item.country}>
+              <div
+                key={item.country}
+                className="group cursor-pointer transition-all"
+                onMouseEnter={() => setHoveredCountry(item.country)}
+                onMouseLeave={() => setHoveredCountry(null)}
+                onClick={() => {
+                  // TODO: Could filter dashboard to show only this country's data
+                  console.log('Clicked country:', item.country, item);
+                }}
+              >
                 {/* Country Name and Revenue */}
-                <div className="flex items-center justify-between mb-2">
+                <div className={`flex items-center justify-between mb-2 transition-all ${
+                  hoveredCountry === item.country ? 'scale-105' : ''
+                }`}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{flag}</span>
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-50">
@@ -93,9 +108,16 @@ export function CountryChart({ data, topN = 5 }: CountryChartProps) {
                 {/* Progress Bar */}
                 <div className="relative h-2 bg-white/30 dark:bg-gray-800/30 rounded-full overflow-hidden">
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-500"
+                    className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-500 ${
+                      hoveredCountry === item.country ? 'shadow-lg' : ''
+                    }`}
                     style={{ width: `${percentage}%` }}
                   />
+                  {hoveredCountry === item.country && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <TrendingUp className="w-3 h-3 text-white" />
+                    </div>
+                  )}
                 </div>
               </div>
             );
