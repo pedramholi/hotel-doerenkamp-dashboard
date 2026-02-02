@@ -109,14 +109,14 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* Stat Cards Row with Upload Button */}
+            {/* Stat Cards Row with Floating Upload Button */}
             <div className="mb-4 xl:mb-5 relative">
-              <StatCards stats={dashboardData.stats} />
-
-              {/* Floating Upload Button - positioned over Room Nights Booked card */}
-              <div className="absolute top-3 right-3 z-10">
+              {/* Floating Upload Button - positioned above and outside the stat cards */}
+              <div className="absolute -top-16 right-0 z-20">
                 <CompactUploadButton onImportComplete={handleImportComplete} />
               </div>
+
+              <StatCards stats={dashboardData.stats} />
             </div>
 
             {/* Main Content Grid */}
